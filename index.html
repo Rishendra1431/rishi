@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Web History Navigator (HTML/JS)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      /* Simple style for smooth transitions */
+      button, input {
+        transition: all 0.2s ease-in-out;
+      }
+      /* Custom scrollbar for a better look */
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 8px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: #1f2937; /* gray-800 */
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #4b5563; /* gray-600 */
+        border-radius: 4px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #6b7280; /* gray-500 */
+      }
+    </style>
+</head>
+<body class="bg-gray-800 text-white font-sans">
+
+    <div id="app-container" class="flex flex-col h-screen">
+      <!-- Browser Controls Header -->
+      <header class="bg-gray-900 p-2 flex items-center space-x-2 shadow-lg z-10">
+          <button id="back-btn" class="p-2 rounded-full">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+            </svg>
+          </button>
+          <button id="forward-btn" class="p-2 rounded-full">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+            </svg>
+          </button>
+          <button id="refresh-btn" class="p-2 rounded-full bg-gray-700 hover:bg-gray-600 text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 11.667 0 8.25 8.25 0 0 0 0-11.667l-3.182-3.182m0 0-3.182 3.183m3.182-3.182-4.992 4.992" />
+            </svg>
+          </button>
+          <button id="home-btn" class="p-2 rounded-full bg-gray-700 hover:bg-gray-600 text-white ml-2">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h7.5" />
+            </svg>
+          </button>
+          <div class="flex-grow relative">
+              <form id="url-form">
+                  <input
+                      id="url-input"
+                      type="text"
+                      placeholder="Enter a URL and press Enter"
+                      class="w-full bg-gray-700 text-white rounded-full py-2 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+              </form>
+          </div>
+          <button id="history-toggle-btn" class="p-2 rounded-full bg-gray-700 hover:bg-gray-600 text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+            </svg>
+          </button>
+      </header>
+
+      <!-- Main Content Area -->
+      <div class="flex flex-row flex-grow overflow-hidden">
+        <main id="browser-view-container" class="flex-grow bg-gray-900">
+            <!-- Home Page View -->
+            <div id="home-page" class="flex flex-col items-center justify-center h-full text-gray-300 p-8">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-24 h-24 text-blue-500 mb-6 animate-pulse">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 0 1-9-9 9 9 0 0 1 9-9 9 9 0 0 1 9 9 9 9 0 0 1-9 9Z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a8.955 8.955 0 0 0-2.87-6.52M3 12a8.955 8.955 0 0 1 2.87-6.52m12.26 0A8.955 8.955 0 0 0 12 3a8.955 8.955 0 0 0-6.13 2.48" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a8.955 8.955 0 0 1-6.13-2.48m12.26 0A8.955 8.955 0 0 1 12 21M3.5 9h17M3.5 15h17" />
+                </svg>
+                <h1 class="text-4xl font-bold text-white mb-2">Web History Navigator</h1>
+                <p class="text-lg text-gray-400 text-center max-w-md">
+                    Welcome! Enter a URL in the address bar above to begin your browsing session.
+                    Use the back and forward arrows to navigate through your history.
+                </p>
+            </div>
+            <!-- Iframe View -->
+            <iframe
+              id="browser-iframe"
+              title="Browser View"
+              class="w-full h-full border-none hidden"
+              sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+            ></iframe>
+        </main>
+        
+        <!-- History Panel -->
+        <aside class="w-64 bg-gray-900 border-l border-gray-700 flex flex-col flex-shrink-0 hidden">
+            <div class="p-4 border-b border-gray-700 flex items-center space-x-2">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-gray-400">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+              </svg>
+              <h2 class="text-lg font-semibold text-white">History</h2>
+            </div>
+            <div class="flex-grow overflow-y-auto custom-scrollbar">
+              <ul id="history-list" class="p-2">
+                <!-- History items will be injected here by JavaScript -->
+              </ul>
+            </div>
+        </aside>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        // --- STATE ---
+        let currentNode = null;
+        const HOME_URL = 'internal://home';
+        const HISTORY_STORAGE_KEY = 'web-navigator-history';
+
+        // --- DOM ELEMENTS ---
+        const backBtn = document.getElementById('back-btn');
+        const forwardBtn = document.getElementById('forward-btn');
+        const refreshBtn = document.getElementById('refresh-btn');
+        const homeBtn = document.getElementById('home-btn');
+        const urlForm = document.getElementById('url-form');
+        const urlInput = document.getElementById('url-input');
+        const browserIframe = document.getElementById('browser-iframe');
+        const homePage = document.getElementById('home-page');
+        const historyList = document.getElementById('history-list');
+        const historyToggleBtn = document.getElementById('history-toggle-btn');
+        const historyPanel = document.querySelector('aside');
+
+        // --- HISTORY PERSISTENCE ---
+        function loadHistory() {
+            const savedHistory = localStorage.getItem(HISTORY_STORAGE_KEY);
+            try {
+                return savedHistory ? JSON.parse(savedHistory) : [];
+            } catch (e) {
+                console.error("Failed to parse history from localStorage", e);
+                return [];
+            }
+        }
+
+        function saveHistory() {
+            localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history));
+        }
+        
+        let history = loadHistory();
+        
+        // --- CORE LOGIC ---
+        function createNode(url, prev = null, next = null) {
+          return { url, prev, next };
+        }
+
+        function navigateTo(url) {
+          if (!url || url.trim() === '') return;
+
+          let fullUrl = url.trim();
+          if (fullUrl !== HOME_URL && !fullUrl.startsWith('http://') && !fullUrl.startsWith('https://')) {
+            fullUrl = `https://${fullUrl}`;
+          }
+
+          if (fullUrl !== HOME_URL && history[history.length - 1] !== fullUrl) {
+            history.push(fullUrl);
+            saveHistory();
+          }
+
+          const newNode = createNode(fullUrl, currentNode);
+          if (currentNode) {
+            currentNode.next = newNode;
+          }
+          currentNode = newNode;
+
+          updateUI();
+        }
+
+        function goBack() {
+          if (currentNode?.prev) {
+            currentNode = currentNode.prev;
+            updateUI();
+          }
+        }
+
+        function goForward() {
+          if (currentNode?.next) {
+            currentNode = currentNode.next;
+            updateUI();
+          }
+        }
+        
+        function goHome() {
+            navigateTo(HOME_URL);
+        }
+
+        function refreshPage() {
+            if (currentNode && currentNode.url !== HOME_URL) {
+                // Changing the key forces a reload
+                browserIframe.src = 'about:blank';
+                setTimeout(() => {
+                    browserIframe.src = currentNode.url;
+                }, 0);
+            }
+        }
+
+        // --- UI UPDATE FUNCTIONS ---
+        function updateUI() {
+          updateControls();
+          updateBrowserView();
+          updateHistoryPanel();
+        }
+
+        function updateControls() {
+          // Update URL input
+          if (currentNode.url !== HOME_URL) {
+            urlInput.value = currentNode.url;
+          } else {
+            urlInput.value = '';
+          }
+
+          // Update back/forward buttons
+          const enabledClass = "bg-gray-700 hover:bg-gray-600 text-white";
+          const disabledClass = "bg-gray-800 text-gray-500 cursor-not-allowed";
+
+          backBtn.disabled = !currentNode.prev;
+          backBtn.className = `p-2 rounded-full ${currentNode.prev ? enabledClass : disabledClass}`;
+
+          forwardBtn.disabled = !currentNode.next;
+          forwardBtn.className = `p-2 rounded-full ${currentNode.next ? enabledClass : disabledClass}`;
+        }
+        
+        function updateBrowserView() {
+            if (currentNode.url === HOME_URL) {
+                homePage.classList.remove('hidden');
+                browserIframe.classList.add('hidden');
+                browserIframe.src = 'about:blank';
+            } else {
+                homePage.classList.add('hidden');
+                browserIframe.classList.remove('hidden');
+                if(browserIframe.src !== currentNode.url) {
+                    browserIframe.src = currentNode.url;
+                }
+            }
+        }
+
+        function updateHistoryPanel() {
+            historyList.innerHTML = ''; // Clear existing list
+
+            if (history.length === 0) {
+                const li = document.createElement('li');
+                li.className = 'text-gray-500 text-center p-4';
+                li.textContent = 'No history yet.';
+                historyList.appendChild(li);
+                return;
+            }
+            
+            [...history].reverse().forEach(url => {
+                const li = document.createElement('li');
+                li.className = 'mb-1';
+                
+                const button = document.createElement('button');
+                button.className = "w-full text-left p-2 rounded-md bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500";
+                button.title = url;
+                button.onclick = () => navigateTo(url);
+                
+                const domainSpan = document.createElement('span');
+                domainSpan.className = 'text-sm text-gray-300 truncate block';
+                domainSpan.textContent = url.replace(/^(https?:\/\/)?(www\.)?/, '').split('/')[0];
+
+                const urlSpan = document.createElement('span');
+                urlSpan.className = 'text-xs text-gray-500 truncate block';
+                urlSpan.textContent = url;
+
+                button.appendChild(domainSpan);
+                button.appendChild(urlSpan);
+                li.appendChild(button);
+                historyList.appendChild(li);
+            });
+        }
+
+        // --- EVENT LISTENERS ---
+        backBtn.addEventListener('click', goBack);
+        forwardBtn.addEventListener('click', goForward);
+        homeBtn.addEventListener('click', goHome);
+        refreshBtn.addEventListener('click', refreshPage);
+
+        urlForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          navigateTo(urlInput.value);
+        });
+
+        historyToggleBtn.addEventListener('click', () => {
+            historyPanel.classList.toggle('hidden');
+        });
+
+        // --- INITIALIZATION ---
+        navigateTo(HOME_URL);
+      });
+    </script>
+</body>
+</html>
